@@ -17,3 +17,12 @@ The dependency-free 0.1.0 subset supports top-level objects, `properties`, `requ
 Donations increase RequiredTruth development production. See [SUPPORT.md](SUPPORT.md); confirmed donors may claim a transaction hash in an issue and request a specific direction.
 
 Apache-2.0 licensed.
+
+
+## Install and run
+
+```sh
+chmod +x install.sh run.sh
+./install.sh
+./run.sh --help
+```
