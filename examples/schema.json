@@ -1,0 +1,1 @@
+{"type":"object","properties":{"kind":{"type":"string"},"power":{"type":"integer"}},"required":["kind","power"],"additionalProperties":false}
