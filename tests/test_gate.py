@@ -27,5 +27,11 @@ class GateTests(unittest.TestCase):
         with self.assertRaisesRegex(GateError, "wrong type"):
             gate.finish()
 
+    def test_duplicate_key_rejected_before_second_value_arrives(self) -> None:
+        gate = SchemaGate(SCHEMA)
+        gate.feed('{"name":"moth","power":"unsafe",')
+        with self.assertRaisesRegex(GateError, "duplicate property: power"):
+            gate.feed('"power":')
+
 if __name__ == "__main__":
     unittest.main()

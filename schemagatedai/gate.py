@@ -30,6 +30,7 @@ class SchemaGate:
         in_string = escape = False
         start = -1
         root_closed = False
+        seen_keys: set[str] = set()
         for index, char in enumerate(self.text):
             if in_string:
                 if escape:
@@ -45,7 +46,7 @@ class SchemaGate:
                                 key = json.loads(self.text[start:index + 1])
                             except json.JSONDecodeError as exc:
                                 raise GateError("invalid JSON object key") from exc
-                            self._check_key(key)
+                            self._check_key(key, seen_keys)
                 continue
             if char == '"':
                 in_string = True
@@ -62,15 +63,18 @@ class SchemaGate:
                     root_closed = True
             elif root_closed and not char.isspace():
                 raise GateError("data appears after the root value")
+        self._seen_keys = seen_keys
 
-    def _check_key(self, key: object) -> None:
+    def _check_key(self, key: object, seen_keys: set[str]) -> None:
         if not isinstance(key, str):
             raise GateError("object key is not text")
+        if key in seen_keys:
+            raise GateError(f"duplicate property: {key}")
         properties = self.schema.get("properties", {})
         assert isinstance(properties, dict)
         if key not in properties and self.schema.get("additionalProperties", True) is False:
             raise GateError(f"unknown property: {key}")
-        self._seen_keys.add(key)
+        seen_keys.add(key)
 
     def finish(self) -> dict[str, object]:
         try:
