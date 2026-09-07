@@ -6,7 +6,7 @@ SchemaGatedAI incrementally inspects streamed JSON from a local model. For top-l
 printf '{"kind":"item","power":7}' | python -m schemagatedai examples/schema.json
 ```
 
-The dependency-free 0.1.0 subset supports top-level objects, `properties`, `required`, `additionalProperties`, and primitive JSON types. It enforces a byte ceiling and rejects data after the root value. Nested value schemas, numeric ranges, unions, and full JSON Schema semantics are explicitly not implemented yet; use a full validator after this early gate when those features matter.
+The dependency-free subset supports top-level objects, `properties`, `required`, `additionalProperties`, and primitive JSON types. It enforces a byte ceiling and rejects duplicate keys and data after the root value. Nested value schemas, numeric ranges, unions, and full JSON Schema semantics are explicitly not implemented yet; use a full validator after this early gate when those features matter.
 
 ## Test
 
@@ -24,10 +24,11 @@ Apache-2.0 licensed.
 ```sh
 chmod +x install.sh run.sh
 ./install.sh
-./run.sh --help
+./run.sh
+./cli.sh --help
 ```
 
 
 ## Standard launcher
 
-`./run.sh` is the normal entry point. It runs `./install.sh` automatically when setup is missing, then opens the PySide6 control panel with live output and actions for the demo, tests, repair, and stop. Use `./cli.sh` for CLI-only operation.
+`./run.sh` is the normal entry point. It runs `./install.sh` automatically when setup is missing, then opens the PySide6 control panel with live output and actions for validating a pasted or bundled payload, running the real test suite, repair, and stop. Use `./cli.sh` for stdin-based CLI operation, `./demo.sh` for the safe bundled example, and `./test.sh` to run the same tests outside the GUI.

@@ -43,14 +43,16 @@ class ControlPanel(QMainWindow):
         title.setFont(QFont("Sans Serif", 20, QFont.Bold))
         self.status = QLabel("Ready")
         self.args = QLineEdit()
-        self.args.setPlaceholderText("Optional CLI arguments")
+        self.args.setPlaceholderText(
+            "Optional JSON payload; blank uses the bundled valid payload"
+        )
         self.output = QPlainTextEdit()
         self.output.setReadOnly(True)
         self.output.setPlaceholderText("Command output appears here.")
 
         buttons = QHBoxLayout()
         for label, handler in (
-            ("Run demo", self.run_demo),
+            ("Validate payload / demo", self.run_demo),
             ("Run tests", self.run_tests),
             ("Install / repair", self.install),
             ("Build APK", self.build_apk),
@@ -99,13 +101,11 @@ class ControlPanel(QMainWindow):
         self._status(f"Finished with exit code {code}")
 
     def run_demo(self) -> None:
-        self._run("cli.sh", shlex.split(self.args.text()))
+        payload = self.args.text()
+        self._run("demo.sh", [payload] if payload.strip() else [])
 
     def run_tests(self) -> None:
-        if (ROOT / "test.sh").exists():
-            self._run("test.sh")
-        else:
-            self._run("cli.sh", ["--help"])
+        self._run("test.sh")
 
     def install(self) -> None:
         self._run("install.sh")
@@ -130,7 +130,13 @@ def main() -> int:
     app = QApplication(sys.argv)
     window = ControlPanel()
     window.show()
-    if os.environ.get("PROJECT_GUI_SMOKE") == "1":
+    smoke = os.environ.get("PROJECT_GUI_SMOKE")
+    if smoke in {"demo", "tests"}:
+        action = window.run_demo if smoke == "demo" else window.run_tests
+        window.process.finished.connect(lambda code, _status: app.exit(code))
+        QTimer.singleShot(0, action)
+        QTimer.singleShot(15_000, lambda: app.exit(124))
+    elif smoke == "1":
         QTimer.singleShot(75, app.quit)
     return app.exec()
 
